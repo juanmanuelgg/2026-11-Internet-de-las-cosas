@@ -2,13 +2,16 @@
 #include <WiFiClientSecure.h>
 #include <time.h>
 #include <PubSubClient.h>
-#include "DHT.h"
-#define DHTTYPE DHT11 // DHT 11
-
-#define dht_dpin 4
-DHT dht(dht_dpin, DHTTYPE);
-
 #include "secrets.h"
+// #include "DHT.h"
+// #define DHTTYPE DHT11 // DHT 11
+// #define dht_dpin 7
+// DHT dht(dht_dpin, DHTTYPE);
+#include <DHT11.h>
+DHT11 dht11(D7); 
+
+int temperature = 0;
+int humidity = 0;
 
 //Conexión a Wifi
 //Nombre de la red Wifi
@@ -37,6 +40,17 @@ const char MQTT_PUB_TOPIC2[] = "temperatura/ciudad/" HOSTNAME;
 #if (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_FINGERPRINT)) or (defined(CHECK_FINGERPRINT) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT) and defined(CHECK_FINGERPRINT))
   #error "cant have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
 #endif
+// #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
+// net.setTinsecure(); //or (defined(CHECK_FINGERPRINT) and defined(CHECK_CA_ROOT)) or (defined(CHECK_PUB_KEY) and defined(CHECK_CA_ROOT) and defined(CHECK_FINGERPRINT))
+// #endif
+// net.setInsecure();
+//   #error "cant have both CHECK_CA_ROOT and CHECK_PUB_KEY enabled"
+// #endif
+
+// Client.setServer(MQTT_HOST, MQTT_PORT);
+// Client.setCallback(receivedCallback);
+
+// mqtt_connect();
 
 BearSSL::WiFiClientSecure net;
 PubSubClient client(net);
@@ -80,11 +94,14 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
 //Configura la conexión del node MCU a Wifi y a Mosquitto
 void setup()
 {
+  pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
   Serial.println();
   Serial.println();
   Serial.print("Attempting to connect to SSID: ");
   Serial.print(ssid);
+  delay(5000);
+  
   WiFi.hostname(HOSTNAME);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
@@ -134,7 +151,7 @@ void setup()
   #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
     net.setInsecure();
   #endif
-
+  net.setInsecure();
   //Llama a funciones de la librería PubSubClient para configurar la conexión con Mosquitto
   client.setServer(MQTT_HOST, MQTT_PORT);
   client.setCallback(receivedCallback);
@@ -172,22 +189,25 @@ void loop()
 
   now = time(nullptr);
   //Lee los datos del sensor
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
+  ///////// Cambio de senssor ///////////////////
+                // float h = dht.readHumidity();
+                // float t = dht.readTemperature();
+  ///////// Cambio de senssor ///////////////////  
+  int result = dht11.readTemperatureHumidity(temperature, humidity);    // Attempt to read the temperature and humidity values from the DHT11 sensor.            
   //Transforma la información a la notación JSON para poder enviar los datos 
   //El mensaje que se envía es de la forma {"value": x}, donde x es el valor de temperatura o humedad
   
   //JSON para humedad
-  String json = "{\"value\": "+ String(h) + "}";
+  String json = "{\"value\": "+ String(humidity) + "}"; // String json = "{\"value\": "+ String(h) + "}";
   char payload1[json.length()+1];
   json.toCharArray(payload1,json.length()+1);
   //JSON para temperatura
-  json = "{\"value\": "+ String(t) + "}";
+  json = "{\"value\": "+ String(temperature) + "}"; //  json = "{\"value\": "+ String(t) + "}";
   char payload2[json.length()+1];
   json.toCharArray(payload2,json.length()+1);
 
   //Si los valores recolectados no son indefinidos, se envían a los tópicos correspondientes
-  if ( !isnan(h) && !isnan(t) ) {
+  if ( !isnan(humidity) && !isnan(temperature) ) {  //  if ( !isnan(h) && !isnan(t) ) {
     //Publica en el tópico de la humedad
     client.publish(MQTT_PUB_TOPIC1, payload1, false);
     //Publica en el tópico de la temperatura
