@@ -10,30 +10,34 @@
 #include <DHT11.h>
 DHT11 dht11(D7); 
 
+const int LDRPin = A0; 
+
 int temperature = 0;
 int humidity = 0;
 
 //Conexión a Wifi
 //Nombre de la red Wifi
-const char ssid[] = "wifi-name";
+const char ssid[] = "DiegoSteel_A33";
 //Contraseña de la red Wifi
-const char pass[] = "wifi-password";
+const char pass[] = "IoT2345";
 
 //Usuario uniandes sin @uniandes.edu.co
-#define HOSTNAME "nodeMCU-hostname"
+#define HOSTNAME "d.aceros"
 
 //Conexión a Mosquitto
 const char MQTT_HOST[] = "iotlab.virtual.uniandes.edu.co";
 const int MQTT_PORT = 8082;
 //Usuario uniandes sin @uniandes.edu.co
-const char MQTT_USER[] = "mosquitto-user";
+const char MQTT_USER[] = "d.aceros";
 //Contraseña de MQTT que recibió por correo
-const char MQTT_PASS[] = "mosquitto-password";
+const char MQTT_PASS[] = "202214329";
 const char MQTT_SUB_TOPIC[] = HOSTNAME "/";
 //Tópico al que se enviarán los datos de humedad
-const char MQTT_PUB_TOPIC1[] = "humedad/ciudad/" HOSTNAME;
+const char MQTT_PUB_TOPIC1[] = "humedad/bogota/" HOSTNAME;
 //Tópico al que se enviarán los datos de temperatura
-const char MQTT_PUB_TOPIC2[] = "temperatura/ciudad/" HOSTNAME;
+const char MQTT_PUB_TOPIC2[] = "temperatura/bogota/" HOSTNAME;
+//Tópico al que se enviarán los datos de temperatura
+const char MQTT_PUB_TOPIC3[] = "luminosidad/bogota/" HOSTNAME;
 
 //////////////////////////////////////////////////////
 
@@ -91,6 +95,13 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
   }
 }
 
+float LuxRead(void)
+{  
+  int V = analogRead(LDRPin);         
+  float ilum = (0.01 * V * V) - (7.1 * V) + 1450;
+   return ilum;
+}
+
 //Configura la conexión del node MCU a Wifi y a Mosquitto
 void setup()
 {
@@ -102,6 +113,12 @@ void setup()
   Serial.print(ssid);
   delay(5000);
   
+  // while(true)
+  // {
+  // Serial.println(LuxRead());  
+  // delay(1000); 
+  // }
+
   WiFi.hostname(HOSTNAME);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, pass);
@@ -151,7 +168,7 @@ void setup()
   #if (!defined(CHECK_PUB_KEY) and !defined(CHECK_CA_ROOT) and !defined(CHECK_FINGERPRINT))
     net.setInsecure();
   #endif
-  net.setInsecure();
+net.setInsecure();
   //Llama a funciones de la librería PubSubClient para configurar la conexión con Mosquitto
   client.setServer(MQTT_HOST, MQTT_PORT);
   client.setCallback(receivedCallback);
@@ -193,7 +210,8 @@ void loop()
                 // float h = dht.readHumidity();
                 // float t = dht.readTemperature();
   ///////// Cambio de senssor ///////////////////  
-  int result = dht11.readTemperatureHumidity(temperature, humidity);    // Attempt to read the temperature and humidity values from the DHT11 sensor.            
+  int result = dht11.readTemperatureHumidity(temperature, humidity);    // Attempt to read the temperature and humidity values from the DHT11 sensor.     
+  float luminosidad = LuxRead();      
   //Transforma la información a la notación JSON para poder enviar los datos 
   //El mensaje que se envía es de la forma {"value": x}, donde x es el valor de temperatura o humedad
   
@@ -205,13 +223,19 @@ void loop()
   json = "{\"value\": "+ String(temperature) + "}"; //  json = "{\"value\": "+ String(t) + "}";
   char payload2[json.length()+1];
   json.toCharArray(payload2,json.length()+1);
+   //JSON para luminosidad
+  json = "{\"value\": "+ String(luminosidad) + "}"; //  json = "{\"value\": "+ String(t) + "}";
+  char payload3[json.length()+1];
+  json.toCharArray(payload3,json.length()+1); 
 
   //Si los valores recolectados no son indefinidos, se envían a los tópicos correspondientes
-  if ( !isnan(humidity) && !isnan(temperature) ) {  //  if ( !isnan(h) && !isnan(t) ) {
+  if ( !isnan(humidity) && !isnan(temperature) && !isnan(luminosidad) ) {  //  if ( !isnan(h) && !isnan(t) ) {
     //Publica en el tópico de la humedad
     client.publish(MQTT_PUB_TOPIC1, payload1, false);
     //Publica en el tópico de la temperatura
     client.publish(MQTT_PUB_TOPIC2, payload2, false);
+    //Publica en el tópico de la luminosidad
+    client.publish(MQTT_PUB_TOPIC3, payload3, false); 
   }
 
   //Imprime en el monitor serial la información recolectada
@@ -221,6 +245,9 @@ void loop()
   Serial.print(MQTT_PUB_TOPIC2);
   Serial.print(" -> ");
   Serial.println(payload2);
+  Serial.print(MQTT_PUB_TOPIC3);
+  Serial.print(" -> ");
+  Serial.println(payload3);
   /*Espera 5 segundos antes de volver a ejecutar la función loop*/
   delay(5000);
 }
