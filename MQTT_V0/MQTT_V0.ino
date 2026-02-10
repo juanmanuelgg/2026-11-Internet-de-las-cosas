@@ -95,12 +95,12 @@ void receivedCallback(char* topic, byte* payload, unsigned int length) {
   }
 }
 
-float LuxRead(void)
-{  
-  int V = analogRead(LDRPin);         
+float LuxRead(void) 
+  int V = analogRead(LDRPin);        
   float ilum = (0.01 * V * V) - (7.1 * V) + 1450;
-   return ilum;
+  return ilum;
 }
+
 
 //Configura la conexión del node MCU a Wifi y a Mosquitto
 void setup()
