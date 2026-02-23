@@ -1,1 +1,5 @@
 secrets.h
+**/env/
+*.log
+logs/*.log
+**/**.crt
