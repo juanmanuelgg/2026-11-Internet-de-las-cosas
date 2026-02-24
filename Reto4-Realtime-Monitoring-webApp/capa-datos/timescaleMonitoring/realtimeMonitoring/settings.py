@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.postgres",
     "django_crontab",
     "realtimeGraph",
     "data_generator",
@@ -81,12 +82,12 @@ WSGI_APPLICATION = "realtimeMonitoring.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": "iot_data",
         "USER": "dbadmin",
-        "PASSWORD": "uniandesIOT1234*",
-        "HOST": "localhost",
-        "PORT": "",
+        "PASSWORD": "iotpass",
+        "HOST": "127.0.0.1",
+        "PORT": "5433",
     }
 }
 
