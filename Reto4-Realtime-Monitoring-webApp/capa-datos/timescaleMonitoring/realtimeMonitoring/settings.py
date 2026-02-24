@@ -85,9 +85,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "iot_data",
         "USER": "dbadmin",
-        "PASSWORD": "iotpass",
+        "PASSWORD": "uniandesIOT1234",
         "HOST": "127.0.0.1",
-        "PORT": "5433",
+        "PORT": "15433",
     }
 }
 

@@ -1,0 +1,47 @@
+services:
+  # PostgreSQL for postgresMonitoring
+  postgres-iot:
+    image: postgres:14
+    container_name: postgres-iot
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - iot-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # TimescaleDB for timescaleMonitoring
+  timescaledb-iot:
+    image: timescale/timescaledb:latest-pg14
+    container_name: timescaledb-iot
+    environment:
+      POSTGRES_PASSWORD: uniandesIOT1234
+      POSTGRES_USER: dbadmin
+      POSTGRES_DB: iot_data
+    ports:
+      - "15433:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    networks:
+      - iot-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbadmin -d iot_data"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  timescale_data:
+
+networks:
+  iot-network:
+    driver: bridge
