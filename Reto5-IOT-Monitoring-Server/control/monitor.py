@@ -1,14 +1,59 @@
-from argparse import ArgumentError
 import ssl
 from django.db.models import Avg
 from datetime import timedelta, datetime
-from receiver.models import Data, Measurement
+from receiver.models import Data
 import paho.mqtt.client as mqtt
 import schedule
 import time
 from django.conf import settings
 
 client = mqtt.Client(settings.MQTT_USER_PUB)
+
+
+def process_temperature_avg_10min_event():
+    '''
+    Nuevo evento:
+    temperatura_promedio_10min > 28°C
+    Acción: publicar alerta MQTT al tópico de la estación.
+    '''
+    print("Evaluando evento: temperatura_promedio_10min > 28°C")
+
+    threshold = 28
+    now = datetime.now()
+    data = Data.objects.filter(
+        base_time__gte=now - timedelta(minutes=10),
+        measurement__name__iexact='temperatura'
+    )
+
+    aggregation = data.values(
+        'station__user__username',
+        'station__location__city__name',
+        'station__location__state__name',
+        'station__location__country__name',
+    ).annotate(temp_avg_10min=Avg('avg_value'))
+
+    events = 0
+    for item in aggregation:
+        temp_avg_10min = item.get('temp_avg_10min')
+        if temp_avg_10min is None or temp_avg_10min <= threshold:
+            continue
+
+        country = item['station__location__country__name']
+        state = item['station__location__state__name']
+        city = item['station__location__city__name']
+        user = item['station__user__username']
+
+        topic = '{}/{}/{}/{}/in'.format(country, state, city, user)
+        message = 'EVENT temperatura_promedio_10min {:.2f} > {}'.format(
+            temp_avg_10min, threshold)
+
+        print(datetime.now(),
+              'Sending event to {} temperatura_promedio_10min={:.2f}'.format(
+                  topic, temp_avg_10min))
+        client.publish(topic, message)
+        events += 1
+
+    print(events, 'eventos temperatura_promedio_10min enviados')
 
 
 def analyze_data():
@@ -58,6 +103,8 @@ def analyze_data():
     print(len(aggregation), "dispositivos revisados")
     print(alerts, "alertas enviadas")
 
+    process_temperature_avg_10min_event()
+
 
 def on_connect(client, userdata, flags, rc):
     '''
@@ -105,7 +152,7 @@ def start_cron():
     Inicia el cron que se encarga de ejecutar la función analyze_data cada minuto.
     '''
     print("Iniciando cron...")
-    schedule.every().hour.do(analyze_data)
+    schedule.every().minute.do(analyze_data)
     print("Servicio de control iniciado")
     while 1:
         schedule.run_pending()
