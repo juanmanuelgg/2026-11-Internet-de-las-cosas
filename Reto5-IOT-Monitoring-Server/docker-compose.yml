@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+
+  timescaledb:
+    image: timescale/timescaledb:2.14.2-pg14
+    container_name: timescaledb
+    environment:
+      POSTGRES_DB: iot_data
+      POSTGRES_USER: dbadmin
+      POSTGRES_PASSWORD: uniandesIOT1234*
+    ports:
+      - "15432:5432"
+    networks:
+      - iot-network
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+
+  mqtt-broker:
+    image: eclipse-mosquitto:2
+    container_name: mqtt-broker
+    ports:
+      - "18082:8082"
+    networks:
+      - iot-network
+    volumes:
+      - ./mosquitto.conf:/etc/mosquitto/config/mosquitto.conf
+      - ./acl.txt:/etc/mosquitto/config/acl.txt
+      - ./users.txt:/etc/mosquitto/config/users.txt
+      - ./certs:/etc/mosquitto/certs
+      - ./ca_certificates:/etc/mosquitto/ca_certificates
+
+networks:
+  iot-network:
+    driver: bridge
+
+volumes:
+  timescale_data:
