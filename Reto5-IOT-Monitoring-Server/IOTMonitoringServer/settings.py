@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-bu+)8ft@9+qd*#e#f_s@wkyv2tmq+#!a^3j15h3kjk^jzksu0j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "35.231.39.19"]
+ALLOWED_HOSTS = ["localhost", "52.201.212.235"]
 
 
 # Application definition
@@ -95,7 +95,7 @@ DATABASES = {
         "NAME": "iot_data",  # Nombre de la base de datos
         "USER": "dbadmin",  # Nombre de usuario
         "PASSWORD": "qf4aDbfb7RXFwIb3pyth9IlVntmlVr",  # Contraseña
-        "HOST": "10.231.0.3",  # Dirección IP de la base de datos
+        "HOST": "100.54.191.161",  # Dirección IP de la base de datos
         "PORT": "5432",  # Puerto de la base de datos
     }
 }
@@ -155,18 +155,18 @@ LOGOUT_REDIRECT_URL = '/login/'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Dirección del bróker MQTT
-MQTT_HOST = "10.141.0.2"
+MQTT_HOST = "50.19.4.70"
 
 # Puerto del bróker MQTT
-MQTT_PORT = 8000
+MQTT_PORT = 8082
 
 # Credenciales para el usuario suscriptor del bróker MQTT
 MQTT_USER = "admin"
 MQTT_PASSWORD = "admin"
 
 # Credenciales para el usuario publicador del bróker MQTT
-MQTT_USER_PUB = "ironman"
-MQTT_PASSWORD_PUB = "jarvis123"
+MQTT_USER_PUB = "admin2"
+MQTT_PASSWORD_PUB = "admin2"
 
 # Tópico a suscribir. "+/+/+/+/out" se suscribe únicamente a los
 # tópicos con forma <país>/<estado>/<ciudad>/<usuario>/out.
