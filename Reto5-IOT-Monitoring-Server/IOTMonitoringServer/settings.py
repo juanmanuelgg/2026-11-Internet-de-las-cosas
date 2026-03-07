@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'crispy_bootstrap4',  # <- El paquete django-crispy-forms v2+ separó los template packs en paquetes independientes, por eso bootstrap4/uni_form.html no existe — hay que instalarlo explícitamente.
     'control',
     'receiver',
     'viewer'
