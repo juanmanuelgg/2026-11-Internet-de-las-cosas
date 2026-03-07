@@ -94,7 +94,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "iot_data",  # Nombre de la base de datos
         "USER": "dbadmin",  # Nombre de usuario
-        "PASSWORD": "qf4aDbfb7RXFwIb3pyth9IlVntmlVr",  # Contraseña
+        "PASSWORD": "uniandesIOT1234*",  # Contraseña
         "HOST": "100.54.191.161",  # Dirección IP de la base de datos
         "PORT": "5432",  # Puerto de la base de datos
     }
