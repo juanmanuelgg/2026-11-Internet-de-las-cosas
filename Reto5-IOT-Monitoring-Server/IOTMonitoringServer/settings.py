@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-bu+)8ft@9+qd*#e#f_s@wkyv2tmq+#!a^3j15h3kjk^jzksu0j
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "34.230.30.64"]
+ALLOWED_HOSTS = ["localhost", "54.90.155.128"] # Ip del viwer
 
 
 # Application definition
@@ -96,7 +96,7 @@ DATABASES = {
         "NAME": "iot_data",  # Nombre de la base de datos
         "USER": "dbadmin",  # Nombre de usuario
         "PASSWORD": "uniandesIOT1234*",  # Contraseña
-        "HOST": "100.26.35.15",  # Dirección IP de la base de datos
+        "HOST": "98.84.104.80",  # Dirección IP de la base de datos
         "PORT": "5432",  # Puerto de la base de datos
     }
 }
@@ -156,7 +156,7 @@ LOGOUT_REDIRECT_URL = '/login/'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 # Dirección del bróker MQTT
-MQTT_HOST = "54.90.216.216"
+MQTT_HOST = "13.218.221.163"
 
 # Puerto del bróker MQTT
 MQTT_PORT = 8082
